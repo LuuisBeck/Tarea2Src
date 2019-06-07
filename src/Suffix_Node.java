@@ -9,6 +9,7 @@ public class Suffix_Node {
 	
 	public Suffix_Node(int max_char, int start, int end, Suffix_Node root) {
 		this.MAX_CHAR = max_char;
+		this.children = new Suffix_Node[MAX_CHAR];
 		for (int i=0; i<this.MAX_CHAR; i++) {
 			this.children[i] = null;
 		}

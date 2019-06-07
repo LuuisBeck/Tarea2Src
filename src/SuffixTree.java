@@ -2,7 +2,7 @@
 public class SuffixTree {
 	private int MAX_CHAR=256;
 	private String text;
-	private Suffix_Node root= null;
+
 	private Suffix_Node lastNewNode = null;
 	private Suffix_Node activeNode = null;
 	private int activeEdge= -1;
@@ -14,6 +14,23 @@ public class SuffixTree {
 	private int splitEnd[] = null; 
 	private int size = -1; //Length of input string 
 	
+	private Suffix_Node root= null;
+	public Suffix_Node getRoot() {
+		return root;
+	}
+
+	public void setRoot(Suffix_Node root) {
+		this.root = root;
+	}
+	
+	
+	public String getText() {
+		return text;
+	}
+
+	public void setText(String text) {
+		this.text = text;
+	}
 
 	public int edgeLength(Suffix_Node n) {
 		if (n.equals(root)) {
