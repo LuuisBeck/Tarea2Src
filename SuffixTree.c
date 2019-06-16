@@ -1,4 +1,6 @@
 #include "SuffixTree.h"
+#include <stdio.h>
+#include <string.h>
 
 char text[100]; //Input string
 Node *root = NULL; //Pointer to root node
@@ -13,6 +15,10 @@ int leafEnd = -1;
 int *rootEnd = NULL;
 int *splitEnd = NULL;
 int size = -1; //Largo string
+
+int num_pos;
+//int* position_list;
+int index_list = 0;
 
 Node *newNode(int start, int *end){
 	Node *node =(Node*) malloc(sizeof(Node));
@@ -239,6 +245,8 @@ void freeSuffixTreeByPostOrder(Node *n)
 	if (n->suffixIndex == -1)
 		free(n->end);
 	free(n);
+	index_list = 0;
+	//position_list = NULL;
 }
 
 /*Build the suffix tree and print the edge labels along with
@@ -282,6 +290,8 @@ int doTraversalToCountLeaf(Node *n)
 		return 0;
 	if(n->suffixIndex > -1)
 	{
+		//position_list[index_list] = n->suffixIndex;
+		index_list++;
 		printf("\nFound at position: %d", n->suffixIndex);
 		return 1;
 	}
@@ -301,11 +311,14 @@ int countLeaf(Node *n)
 {
 	if(n == NULL)
 		return 0;
+
 	return doTraversalToCountLeaf(n);
+
 }
 
 int doTraversal(Node *n, char* str, int idx)
 {
+	num_pos=0;
 	if(n == NULL)
 	{
 		return -1; // no match
@@ -320,11 +333,17 @@ int doTraversal(Node *n, char* str, int idx)
 			return -1;
 		if(res == 1) //match
 		{
-			if(n->suffixIndex > -1)
+			if(n->suffixIndex > -1){
+				num_pos=1;
+				//position_list[index_list] = n->suffixIndex;
+				index_list++;
 				printf("\nsubstring count: 1 and position: %d",
 							n->suffixIndex);
-			else
-				printf("\nsubstring count: %d", countLeaf(n));
+			}
+			else{
+				num_pos=countLeaf(n);
+				printf("\nsubstring count: %d", num_pos);
+			}
 			return 1;
 		}
 	}
@@ -347,9 +366,71 @@ void checkForSubString(char* str)
 		printf("\nPattern <%s> is NOT a Substring\n", str);
 }
 
+int count(char* T, char* P){
+	freeSuffixTreeByPostOrder(root);
+	strcpy(text, T);
+	strcat(text,"$");
+
+	buildSuffixTree();
+	checkForSubString(P);
+
+	return num_pos;
+}
+/*
+int[] locate(char* T, char* P) {
+	freeSuffixTreeByPostOrder(root);
+	strcpy(text, T);
+	strcat(text,"$");
+	buildSuffixTree();
+	checkForSubString(P);
+
+	return position_list;
+//	check
+}
+void locateTest() {
+	char* T = "holoholaholaho";
+	char* P = "z";
+	for (size_t i = 0; i < index_list; i++) {
+		printf("Lista posiciones: %d\n", locate(T,P));
+	}
+}
+*/
+void countTest(){
+	char* T = "holoholaholaho";
+	char* P = "z";
+	printf("CONTEO: %d\n", count(T,P));
+}
+
+
+char** top_k_q(char* T, int k, int q){
+	int fin_palabra=q;
+	int* int_resultados;
+	char resultado[k];
+
+	for (int i=0; i<strlen(T) && fin_palabra<strlen(T); i++){//
+		fin_palabra = i + q;
+		char substr[q]; //darle el valor de T[i,fin_palabra]
+		strncpy(substr, T +i , q);
+		substr[q]='\0';
+		printf("Substring: %s\n",substr);
+		//hacer count(T,substr)
+		//compararlo con los elementos de int_resultados
+			//si es mayor que alguno, los intercambio en int_resultados y resultado
+			//si no, queda todo igual
+	}
+	//return resultado;
+
+}
+
 // driver program to test above functions
 int main(int argc, char *argv[])
 {
+  count("jojo","j");
+	countTest();
+	printf("----------------------\n");
+
+
+
 	strcpy(text, "GEEKSFORGEEKS$");
 	buildSuffixTree();
 	printf("Text: GEEKSFORGEEKS, Pattern to search: GEEKS");
@@ -385,5 +466,7 @@ int main(int argc, char *argv[])
 	//Free the dynamically allocated memory
 	freeSuffixTreeByPostOrder(root);
 
+	printf("-------------------------------\n" );
+	top_k_q("hola",3,2);
 	return 0;
 }
