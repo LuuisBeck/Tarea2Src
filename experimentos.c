@@ -59,6 +59,17 @@ double experiment_count_adn(int sizetext, char* patron){
   return time_taken;
 }
 
+double experiment_locate_adn(int sizetext, char* patron){
+  //procesar source como string
+  clock_t t;
+  t = clock();
+  locate(adn_ready, patron);
+  t = clock() - t;
+  double time_taken = ((double)t)/CLOCKS_PER_SEC; //en segundos
+  return time_taken;
+}
+
+
 double experiment_count_english(int sizetext, char* patron){
   //procesar source como string
   clock_t t;
@@ -80,6 +91,8 @@ int main(int argc, char const *argv[]) {
 
   // Count, patrón tamaño m, ADN, n/10 strings
   int m[] = {8, 16, 32, 64};
+  printf("TEST ADN\n" );
+  printf("-> TEST COUNT\n" );
   for (int i = 0; i < 14; i++) {  //Iteracion en n_largos
     printf("\n---------------------\n" );
     printf("n_largos: %d\n", n_largos[i] );
@@ -91,9 +104,14 @@ int main(int argc, char const *argv[]) {
       patron[m[j]] = '\0';
       double time2 = experiment_count_adn(n_largos[i], patron);
       printf("Tiempo count: %f\n", time2);
+      double timeloc = experiment_locate_adn(n_largos[i], patron);
+      printf("Tiempo locate: %f\n", timeloc);
       printf("......\n" );
     }
-
   }
+
+
+
+
   return 0;
 }

@@ -1,6 +1,8 @@
 #include "SuffixTree.h"
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
+#include <time.h>
 
 char text[100]; //Input string
 Node *root = NULL; //Pointer to root node
@@ -263,7 +265,12 @@ int count(char* T, char* P){
 	strcpy(text, T);
 	strcat(text,"$");
 
+	printf("Tiempo de Construcción: ");
+	clock_t t = clock();
 	buildSuffixTree();
+	t= clock() - t;
+	double time_taken = ((double)t)/CLOCKS_PER_SEC; //en segundos
+	printf("%f\n", time_taken);
 	checkForSubString(P);
 
 	return num_pos;
