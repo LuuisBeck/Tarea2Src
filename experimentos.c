@@ -25,21 +25,24 @@ int is_char_good(char c){
 void preprocess_files(char* filename, int sizetext) {
   char source[sizetext + 1];
   FILE *fp = fopen(filename, "r");
+  char symbol;
   if (fp != NULL) {
     int i = 0;
     while((symbol = getc(fp)) != EOF && i < sizetext) {
       char tolower_char = tolower(symbol);
       int add_char = is_char_good(tolower_char);
       if (add_char) {
-        strcat(source, tolower_char);
+        char *pChar = malloc(sizeof(char));
+        *pChar = tolower_char;
+        strcat(source, pChar);
         i++;
       }
     }
     if (filename == "dna.50MB.txt") {
-      adn_ready = source;
+      char* adn_ready = source;
     }
     else if (filename == "english.50MB.txt") {
-      english_ready = source;
+      char* english_ready = source;
     }
 
     fclose(fp);
@@ -64,9 +67,9 @@ double experiment_count_english(int sizetext, char* patron){
   double time_taken = ((double)t)/CLOCKS_PER_SEC; //en segundos
 }
 
-int int main(int argc, char const *argv[]) {
-  int* n_largos = [1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288,
-                1048576, 2097152, 4194304, 8388608];
+int main(int argc, char const *argv[]) {
+  int n_largos[] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288,
+                1048576, 2097152, 4194304, 8388608};
   preprocess_files("adn.50MB.txt", n_largos[0]);
   preprocess_files("english.50MB.txt", n_largos[0]);
   //Primera coleccion: texto en inglés
@@ -75,12 +78,12 @@ int int main(int argc, char const *argv[]) {
   //double time1 = experiment_count(n_largos[0], );
 
   // Count, patrón tamaño m, ADN, n/10 strings
-  int* m = [8, 16, 32, 64];
+  int m[] = {8, 16, 32, 64};
   for (int i = 0; i < 14; i++) {  //Iteracion en n_largos
     for (int j = 0; j < 4; j++) { //Iteracion en tamaño del patron
       int random = random_number(0, n_largos[i] - m[j]);
       char patron[m[j] + 1];
-      strncpy(patron, adn_ready[8388700], m[j]);
+      strncpy(patron, adn_ready, m[j]);
       patron[m[j]] = '\0';
       double time2 = experiment_count_adn(n_largos[i], patron);
       printf("Tiempo %f\n", time2);
