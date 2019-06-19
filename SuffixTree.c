@@ -17,7 +17,7 @@ int *splitEnd = NULL;
 int size = -1; //Largo string
 
 int num_pos;
-//int* position_list;
+int position_list[100];
 int index_list = 0;
 
 Node *newNode(int start, int *end){
@@ -26,17 +26,10 @@ Node *newNode(int start, int *end){
 	for (i = 0; i < MAX_CHAR; i++)
 		node->children[i] = NULL;
 
-	/*For root node, suffixLink will be set to NULL
-	For internal nodes, suffixLink will be set to root
-	by default in current extension and may change in
-	next extension*/
 	node->suffixLink = root;
 	node->start = start;
 	node->end = end;
 
-	/*suffixIndex will be set to -1 by default and
-	actual suffix index will be set later for leaves
-	at the end of all phases*/
 	node->suffixIndex = -1;
 	return node;
 }
@@ -48,11 +41,6 @@ int edgeLength(Node *n) {
 }
 
 int walkDown(Node *currNode){
-	/*activePoint change for walk down (APCFWD) using
-	Skip/Count Trick (Trick 1). If activeLength is greater
-	than current edge length, set next internal node as
-	activeNode and adjust activeEdge and activeLength
-	accordingly to represent same activePoint*/
 	if (activeLength >= edgeLength(currNode)){
 		activeEdge += edgeLength(currNode);
 		activeLength -= edgeLength(currNode);
@@ -63,195 +51,114 @@ int walkDown(Node *currNode){
 }
 
 void extendSuffixTree(int pos){
-	/*Extension Rule 1, this takes care of extending all
-	leaves created so far in tree*/
 	leafEnd = pos;
 
-	/*Increment remainingSuffixCount indicating that a
-	new suffix added to the list of suffixes yet to be
-	added in tree*/
 	remainingSuffixCount++;
 
-	/*set lastNewNode to NULL while starting a new phase,
-	indicating there is no internal node waiting for
-	it's suffix link reset in current phase*/
 	lastNewNode = NULL;
 
-	//Add all suffixes (yet to be added) one by one in tree
 	while(remainingSuffixCount > 0) {
 
 		if (activeLength == 0)
-			activeEdge = pos; //APCFALZ
+			activeEdge = pos;
 
-		// There is no outgoing edge starting with
-		// activeEdge from activeNode
+
 		if (activeNode->children[text[activeEdge]] == NULL){
-			//Extension Rule 2 (A new leaf edge gets created)
 			activeNode->children[text[activeEdge]] =
 										newNode(pos, &leafEnd);
 
-			/*A new leaf edge is created in above line starting
-			from an existing node (the current activeNode), and
-			if there is any internal node waiting for its suffix
-			link get reset, point the suffix link from that last
-			internal node to current activeNode. Then set lastNewNode
-			to NULL indicating no more node waiting for suffix link
-			reset.*/
 			if (lastNewNode != NULL){
 				lastNewNode->suffixLink = activeNode;
 				lastNewNode = NULL;
 			}
 		}
-		// There is an outgoing edge starting with activeEdge
-		// from activeNode
 		else{
-			// Get the next node at the end of edge starting
-			// with activeEdge
 			Node *next = activeNode->children[text[activeEdge]];
 			if (walkDown(next)){
-				//Start from next node (the new activeNode)
 				continue;
 			}
-			/*Extension Rule 3 (current character being processed
-			is already on the edge)*/
 			if (text[next->start + activeLength] == text[pos]){
-				//If a newly created node waiting for it's
-				//suffix link to be set, then set suffix link
-				//of that waiting node to current active node
 				if(lastNewNode != NULL && activeNode != root){
 					lastNewNode->suffixLink = activeNode;
 					lastNewNode = NULL;
 				}
 
-				//APCFER3
 				activeLength++;
-				/*STOP all further processing in this phase
-				and move on to next phase*/
 				break;
 			}
 
-			/*We will be here when activePoint is in middle of
-			the edge being traversed and current character
-			being processed is not on the edge (we fall off
-			the tree). In this case, we add a new internal node
-			and a new leaf edge going out of that new node. This
-			is Extension Rule 2, where a new leaf edge and a new
-			internal node get created*/
 			splitEnd = (int*) malloc(sizeof(int));
 			*splitEnd = next->start + activeLength - 1;
 
-			//New internal node
 			Node *split = newNode(next->start, splitEnd);
 			activeNode->children[text[activeEdge]] = split;
 
-			//New leaf coming out of new internal node
 			split->children[text[pos]] = newNode(pos, &leafEnd);
 			next->start += activeLength;
 			split->children[text[next->start]] = next;
 
-			/*We got a new internal node here. If there is any
-			internal node created in last extensions of same
-			phase which is still waiting for it's suffix link
-			reset, do it now.*/
+
 			if (lastNewNode != NULL)
 			{
-			/*suffixLink of lastNewNode points to current newly
-			created internal node*/
+
 				lastNewNode->suffixLink = split;
 			}
 
-			/*Make the current newly created internal node waiting
-			for it's suffix link reset (which is pointing to root
-			at present). If we come across any other internal node
-			(existing or newly created) in next extension of same
-			phase, when a new leaf edge gets added (i.e. when
-			Extension Rule 2 applies is any of the next extension
-			of same phase) at that point, suffixLink of this node
-			will point to that internal node.*/
 			lastNewNode = split;
 		}
 
-		/* One suffix got added in tree, decrement the count of
-		suffixes yet to be added.*/
 		remainingSuffixCount--;
-		if (activeNode == root && activeLength > 0) //APCFER2C1
-		{
+		if (activeNode == root && activeLength > 0){
 			activeLength--;
 			activeEdge = pos - remainingSuffixCount + 1;
 		}
-		else if (activeNode != root) //APCFER2C2
-		{
+		else if (activeNode != root){
 			activeNode = activeNode->suffixLink;
 		}
 	}
 }
 
-void print(int i, int j)
-{
+void print(int i, int j){
 	int k;
 	for (k=i; k<=j; k++)
 		printf("%c", text[k]);
 }
 
-//Print the suffix tree as well along with setting suffix index
-//So tree will be printed in DFS manner
-//Each edge along with it's suffix index will be printed
 void setSuffixIndexByDFS(Node *n, int labelHeight){
 	if (n == NULL) return;
 
-	if (n->start != -1) //A non-root node
-	{
-		//Print the label on edge from parent to current node
-		//Uncomment below line to print suffix tree
-	// print(n->start, *(n->end));
-	}
 	int leaf = 1;
 	int i;
 	for (i = 0; i < MAX_CHAR; i++)
 	{
-		if (n->children[i] != NULL)
-		{
-			//Uncomment below two lines to print suffix index
-		// if (leaf == 1 && n->start != -1)
-			// printf(" [%d]\n", n->suffixIndex);
-
-			//Current node is not a leaf as it has outgoing
-			//edges from it.
+		if (n->children[i] != NULL){
 			leaf = 0;
-			setSuffixIndexByDFS(n->children[i], labelHeight +
-								edgeLength(n->children[i]));
+			setSuffixIndexByDFS(n->children[i], labelHeight +	edgeLength(n->children[i]));
 		}
 	}
-	if (leaf == 1)
-	{
+	if (leaf == 1){
 		n->suffixIndex = size - labelHeight;
-		//Uncomment below line to print suffix index
-		//printf(" [%d]\n", n->suffixIndex);
 	}
 }
 
-void freeSuffixTreeByPostOrder(Node *n)
-{
+void freeSuffixTreeByPostOrder(Node *n){
 	if (n == NULL)
 		return;
 	int i;
-	for (i = 0; i < MAX_CHAR; i++)
-	{
-		if (n->children[i] != NULL)
-		{
+	for (i = 0; i < MAX_CHAR; i++){
+		if (n->children[i] != NULL){
 			freeSuffixTreeByPostOrder(n->children[i]);
 		}
 	}
 	if (n->suffixIndex == -1)
 		free(n->end);
 	free(n);
+	for (int i = 0; i < index_list; i++) {
+		position_list[i] = 0;
+	}
 	index_list = 0;
-	//position_list = NULL;
 }
 
-/*Build the suffix tree and print the edge labels along with
-suffixIndex. suffixIndex for leaf edges will be >= 0 and
-for non-leaf edges will be -1*/
 void buildSuffixTree()
 {
 	size = strlen(text);
@@ -259,40 +166,33 @@ void buildSuffixTree()
 	rootEnd = (int*) malloc(sizeof(int));
 	*rootEnd = - 1;
 
-	/*Root is a special node with start and end indices as -1,
-	as it has no parent from where an edge comes to root*/
 	root = newNode(-1, rootEnd);
 
-	activeNode = root; //First activeNode will be root
+	activeNode = root;
 	for (i=0; i<size; i++)
 		extendSuffixTree(i);
 	int labelHeight = 0;
 	setSuffixIndexByDFS(root, labelHeight);
 }
 
-int traverseEdge(char *str, int idx, int start, int end)
-{
+int traverseEdge(char *str, int idx, int start, int end){
 	int k = 0;
-	//Traverse the edge with character by character matching
-	for(k=start; k<=end && str[idx] != '\0'; k++, idx++)
-	{
+
+	for(k=start; k<=end && str[idx] != '\0'; k++, idx++){
 		if(text[k] != str[idx])
-			return -1; // mo match
+			return -1;
 	}
 	if(str[idx] == '\0')
-		return 1; // match
-	return 0; // more characters yet to match
+		return 1;
+	return 0;
 }
 
-int doTraversalToCountLeaf(Node *n)
-{
+int doTraversalToCountLeaf(Node *n){
 	if(n == NULL)
 		return 0;
-	if(n->suffixIndex > -1)
-	{
-		//position_list[index_list] = n->suffixIndex;
+	if(n->suffixIndex > -1){
+		position_list[index_list] = n->suffixIndex;
 		index_list++;
-		printf("\nFound at position: %d", n->suffixIndex);
 		return 1;
 	}
 	int count = 0;
@@ -307,8 +207,7 @@ int doTraversalToCountLeaf(Node *n)
 	return count;
 }
 
-int countLeaf(Node *n)
-{
+int countLeaf(Node *n){
 	if(n == NULL)
 		return 0;
 
@@ -316,58 +215,51 @@ int countLeaf(Node *n)
 
 }
 
-int doTraversal(Node *n, char* str, int idx)
-{
+int doTraversal(Node *n, char* str, int idx){
 	num_pos=0;
 	if(n == NULL)
 	{
-		return -1; // no match
+		return -1;
 	}
 	int res = -1;
-	//If node n is not root node, then traverse edge
-	//from node n's parent to node n.
-	if(n->start != -1)
-	{
+
+	if(n->start != -1){
 		res = traverseEdge(str, idx, n->start, *(n->end));
-		if(res == -1) //no match
+		if(res == -1)
 			return -1;
-		if(res == 1) //match
-		{
+		if(res == 1){
 			if(n->suffixIndex > -1){
 				num_pos=1;
-				//position_list[index_list] = n->suffixIndex;
+				position_list[index_list] = n->suffixIndex;
 				index_list++;
-				printf("\nsubstring count: 1 and position: %d",
-							n->suffixIndex);
 			}
 			else{
 				num_pos=countLeaf(n);
-				printf("\nsubstring count: %d", num_pos);
 			}
 			return 1;
 		}
 	}
-	//Get the character index to search
+
 	idx = idx + edgeLength(n);
-	//If there is an edge from node n going out
-	//with current character str[idx], traverse that edge
+
 	if(n->children[str[idx]] != NULL)
 		return doTraversal(n->children[str[idx]], str, idx);
 	else
 		return -1; // no match
 }
 
-void checkForSubString(char* str)
-{
+int checkForSubString(char* str){
 	int res = doTraversal(root, str, 0);
-	if(res == 1)
-		printf("\nPattern <%s> is a Substring\n", str);
-	else
-		printf("\nPattern <%s> is NOT a Substring\n", str);
+	if(res == 1){
+		return 1;
+	}
+	else{
+		return 0;
+	}
 }
 
 int count(char* T, char* P){
-	freeSuffixTreeByPostOrder(root);
+	//freeSuffixTreeByPostOrder(root);
 	strcpy(text, T);
 	strcat(text,"$");
 
@@ -376,8 +268,8 @@ int count(char* T, char* P){
 
 	return num_pos;
 }
-/*
-int[] locate(char* T, char* P) {
+
+int* locate(char* T, char* P) {
 	freeSuffixTreeByPostOrder(root);
 	strcpy(text, T);
 	strcat(text,"$");
@@ -385,48 +277,119 @@ int[] locate(char* T, char* P) {
 	checkForSubString(P);
 
 	return position_list;
-//	check
 }
+
 void locateTest() {
 	char* T = "holoholaholaho";
-	char* P = "z";
-	for (size_t i = 0; i < index_list; i++) {
-		printf("Lista posiciones: %d\n", locate(T,P));
+	char* P = "ho";
+	int* array_results = locate(T,P);
+	if (index_list != 0) {
+		for (int i = 0; i < index_list; i++) {
+			printf("POSICIONES: %d\n", array_results[i]);
+		}
 	}
 }
-*/
+
 void countTest(){
 	char* T = "holoholaholaho";
 	char* P = "z";
 	printf("CONTEO: %d\n", count(T,P));
 }
 
+typedef struct key_value{
+	int key;
+	char* value;
+}kv;
 
+kv create_kv(int k, char* v){
+	kv n;
+	n.key=k;
+	n.value = v;
+	return n;
+}
+
+int notinArray(char** array, char* str, int ocupados){
+	int i;
+	for(i=0; i<ocupados; i++){
+
+		if (array[i]==str){
+			return 0;
+		}
+	}
+	return 1;
+}
+
+char** getAllvalues(kv* array, int k){
+	char** resultados;
+	for(int i=0; i<k; i++){
+		resultados[i]= array[i].value;
+		printf("%s\n", resultados[i] );
+	}
+	return resultados;
+}
+/*
 char** top_k_q(char* T, int k, int q){
 	int fin_palabra=q;
-	int* int_resultados;
-	char resultado[k];
+	char** revisadas;
+	kv resultado[k];
+	int libre = 0;
+	int num_revisadas = 0;
+
+	char res_final[k][q+1];
 
 	for (int i=0; i<strlen(T) && fin_palabra<strlen(T); i++){//
+
 		fin_palabra = i + q;
 		char substr[q]; //darle el valor de T[i,fin_palabra]
 		strncpy(substr, T +i , q);
 		substr[q]='\0';
-		printf("Substring: %s\n",substr);
-		//hacer count(T,substr)
-		//compararlo con los elementos de int_resultados
-			//si es mayor que alguno, los intercambio en int_resultados y resultado
-			//si no, queda todo igual
+
+		int apariciones;
+		if(notinArray(revisadas, substr, num_revisadas)){ //si no esta ya en la lista de strings revisados
+			apariciones = count(T,substr);
+			if(libre<k){ //queda espacio, agrego al tiro
+				resultado[libre].key= apariciones;
+				resultado[libre].value = substr;
+			}
+			else{ //no queda espacio, hay que verificar
+				for (int q=0; q<k; q++){
+					if (resultado[q].key < apariciones){ //reemplazo
+						resultado[q].key = apariciones;
+						resultado[q].value = substr;
+					}
+				}
+
+			}
+			revisadas[libre]= substr;
+			num_revisadas++;
+			libre++;
+		}
 	}
-	//return resultado;
+	res_final[0]="ha";
+	printf("jojo\n" );
+	printf("j: %s\n",res_final[0]);
+
+	for (int num=0; num<k; num++){
+		printf("ENTRO!\n" );
+		res_final[0]="hola";
+		printf("jojo\n" );
+		printf("j: %s\n",res_final[0]);
+
+		res_final[num]= resultado[num].value;
+		printf("AQ!\n");
+	}
+	printf("AQUIII!\n");
+	return res_final;
 
 }
+*/
 
+/*
 // driver program to test above functions
 int main(int argc, char *argv[])
 {
-  count("jojo","j");
-	countTest();
+
+
 	printf("----------------------\n");
 
 
@@ -467,6 +430,14 @@ int main(int argc, char *argv[])
 	freeSuffixTreeByPostOrder(root);
 
 	printf("-------------------------------\n" );
-	top_k_q("hola",3,2);
+
+
+	char* T = "holoholaholaho";
+	char* P = "ho";
+
+
+	printf("HOLAAAA!\n");
+	//top_k_q(T,3,2);
 	return 0;
 }
+*/

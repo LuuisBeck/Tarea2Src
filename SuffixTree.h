@@ -28,4 +28,6 @@ int traverseEdge(char *str, int idx, int start, int end);
 int doTraversalToCountLeaf(Node *n);
 int countLeaf(Node *n);
 int doTraversal(Node *n, char* str, int idx);
-void checkForSubString(char* str);
+int checkForSubString(char* str);
+int count(char* T, char* P);
+int* locate(char* T, char* P);
