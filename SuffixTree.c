@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <time.h>
 
-char text[100]; //Input string
+char text[8388700]; //Input string
 Node *root = NULL; //Pointer to root node
 Node *lastNewNode = NULL;
 Node *activeNode = NULL;
@@ -264,13 +264,6 @@ int count(char* T, char* P){
 	//freeSuffixTreeByPostOrder(root);
 	strcpy(text, T);
 	strcat(text,"$");
-
-	printf("Tiempo de Construcción: ");
-	clock_t t = clock();
-	buildSuffixTree();
-	t= clock() - t;
-	double time_taken = ((double)t)/CLOCKS_PER_SEC; //en segundos
-	printf("%f\n", time_taken);
 	checkForSubString(P);
 
 	return num_pos;
@@ -280,7 +273,6 @@ int* locate(char* T, char* P) {
 	freeSuffixTreeByPostOrder(root);
 	strcpy(text, T);
 	strcat(text,"$");
-	buildSuffixTree();
 	checkForSubString(P);
 
 	return position_list;

@@ -16,6 +16,7 @@ typedef struct SuffixTreeNode {
 	int suffixIndex;
 }Node;
 
+char text[8388700]; //Input string
 Node *newNode(int start, int *end);
 void extendSuffixTree(int pos);
 int edgeLength(Node *n);
