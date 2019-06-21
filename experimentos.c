@@ -139,7 +139,8 @@ int main(int argc, char const *argv[]) {
   fprintf(file_locate_adn, "TEST ADN\n");
   fprintf(file_count_adn, "-> TEST COUNT\n");
   fprintf(file_locate_adn, "-> TEST LOCATE\n");
-  for (int i = 0; i < 14; i++) {  //Iteracion en n_largos
+  printf("%s\n", adn_ready);
+  for (int i = 0; i < 1; i++) {  //Iteracion en n_largos
     fprintf(file_count_adn, "\n---------------------\n");
     fprintf(file_locate_adn, "\n---------------------\n");
     fprintf(file_count_adn, "n_largos: %d\n", n_largos[i]);
@@ -150,9 +151,9 @@ int main(int argc, char const *argv[]) {
       for (int z = 0; z < (n_largos[i]/40); z++) { //N/40 experimentos por cada m
         int random = random_number(0, n_largos[i] - m[j]);
         char patron[m[j] + 1];
-        strncpy(patron, adn_ready, m[j]);
-        patron[m[j]] = '\0';
-        //printf("Patron %s\n", patron);
+        strncpy(patron, adn_ready + random, m[j]);
+        //patron[m[j]] = '\0';
+        printf("%s\n", patron);
         double time2 = experiment_count_adn(n_largos[i], patron);
         fprintf(file_count_adn, "%f\n", time2);
         double timeloc = experiment_locate_adn(n_largos[i], patron);

@@ -270,7 +270,7 @@ int count(char* T, char* P){
 }
 
 int* locate(char* T, char* P) {
-	freeSuffixTreeByPostOrder(root);
+	//freeSuffixTreeByPostOrder(root);
 	strcpy(text, T);
 	strcat(text,"$");
 	checkForSubString(P);
