@@ -1,7 +1,8 @@
 # Tarea2Src
 
 Para ejecutar el código usar
-  cc -o ejecutable SuffixTree.c experimentos.c
+
+  <br>cc -o ejecutable SuffixTree.c experimentos.c <br>
   ./ejecutable
   
 Dentro del main:
