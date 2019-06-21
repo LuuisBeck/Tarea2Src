@@ -118,7 +118,7 @@ double experiment_count_english(int sizetext, char* patron){
 int main(int argc, char const *argv[]) {
   int n_largos[] = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288,
                 1048576, 2097152, 4194304, 8388608};
-  preprocess_dna_file(n_largos[0]);
+  preprocess_dna_file(n_largos[11]);
   //preprocess_english_file(n_largos[0]);
   //Primera coleccion: texto en inglés
   //  Count, patrón tipo palabra aleatorio, english text
@@ -139,8 +139,8 @@ int main(int argc, char const *argv[]) {
   fprintf(file_locate_adn, "TEST ADN\n");
   fprintf(file_count_adn, "-> TEST COUNT\n");
   fprintf(file_locate_adn, "-> TEST LOCATE\n");
-  printf("%s\n", adn_ready);
-  for (int i = 0; i < 1; i++) {  //Iteracion en n_largos
+  int i = 11;
+  //for (int i = 0; i < 2; i++) {  //Iteracion en n_largos
     fprintf(file_count_adn, "\n---------------------\n");
     fprintf(file_locate_adn, "\n---------------------\n");
     fprintf(file_count_adn, "n_largos: %d\n", n_largos[i]);
@@ -152,7 +152,7 @@ int main(int argc, char const *argv[]) {
         int random = random_number(0, n_largos[i] - m[j]);
         char patron[m[j] + 1];
         strncpy(patron, adn_ready + random, m[j]);
-        //patron[m[j]] = '\0';
+        patron[m[j]] = '\0';
         printf("%s\n", patron);
         double time2 = experiment_count_adn(n_largos[i], patron);
         fprintf(file_count_adn, "%f\n", time2);
@@ -162,7 +162,7 @@ int main(int argc, char const *argv[]) {
       fprintf(file_count_adn, "......\n" );
       fprintf(file_locate_adn, "......\n" );
     }
-  }
+  //}
 
 
   return 0;
